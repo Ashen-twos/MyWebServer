@@ -168,7 +168,7 @@ HttpEnum::HTTP_CODE HttpRequest::start_read()
     HttpEnum::LINE_STATE linestate = HttpEnum::LINE_OK;
     HttpEnum::HTTP_CODE httpcode = HttpEnum::NO_REQUEST;
     //！！！！！！！！！！！！！！！！！POST的content没有\r\n，需要额外判断
-    while ((Fsm_state == HttpEnum::CHECK_CONTENT && httpcode == HttpEnum::LINE_OK) || (linestate = parse_line(buff)) == HttpEnum::LINE_OK)
+    while ((Fsm_state == HttpEnum::CHECK_CONTENT && linestate == HttpEnum::LINE_OK) || (linestate = parse_line(buff)) == HttpEnum::LINE_OK)
     {
         char *temp = buff + start_line;
         start_line = index_checked;
