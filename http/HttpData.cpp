@@ -9,12 +9,11 @@
 
 int HttpData::epfd = -1;
 
-HttpData::HttpData() 
+HttpData::HttpData() :
+request(new HttpRequest),message(new HttpMsg),timer(new TimerNode)
 {
     sockfd = -1;
-    request = new HttpRequest;
-    message = new HttpMsg;
-    timer = new TimerNode;
+    
     alive = false;
 }
 
@@ -25,9 +24,7 @@ HttpData::HttpData(int epf, int fd) : HttpData()
 
 HttpData::~HttpData()
 {
-    delete request;
-    delete message;
-    delete timer;
+
 }
 
 void HttpData::init()

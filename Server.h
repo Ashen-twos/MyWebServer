@@ -4,8 +4,8 @@
 #include "Timer/Timer.h"
 #include "Log/Log.h"
 #include "MySQL/MySQLPool.h"
+#include <unordered_map>
 
-#define MAX_CONN 65536
 
 class Server
 {
@@ -20,7 +20,7 @@ class Server
         InetAddress addr;           //服务器地址
         InetAddress client_addr;    //新用户地址
         int client_sock;            //用户sock 
-        HttpData *conn;             //连接
+        std::unordered_map<int,std::shared_ptr<HttpData>> conn;             //连接
         TimerManager timermanager;  //管理计时器
         MySQLPool* sql;             //数据库连接池
 
@@ -35,9 +35,9 @@ class Server
         void evenloop();      //循环监听
         void run();           //服务器启动
 
-        void OnRead(HttpData*);
-        void OnWrite(HttpData*);
-        void CloseConn(HttpData*);
+        void OnRead(std::shared_ptr<HttpData>);
+        void OnWrite(std::shared_ptr<HttpData>);
+        void CloseConn(std::shared_ptr<HttpData>);
         void initlog(bool log);
         
 

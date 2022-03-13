@@ -13,10 +13,10 @@ class TimerNode;
 class HttpData{
     public:
         static int epfd;            //epollfd
-        HttpRequest* request;       //请求
-        HttpMsg* message;           //应答  
+        std::shared_ptr<HttpRequest> request;       //请求
+        std::shared_ptr<HttpMsg> message;           //应答  
+        std::shared_ptr<TimerNode> timer;           //对应的计时器
         int sockfd;                 //用户socket
-        TimerNode* timer;           //对应的计时器
         bool alive;
 
 

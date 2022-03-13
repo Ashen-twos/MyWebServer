@@ -1,8 +1,6 @@
 #include "HttpMsg.h"
 #include <string.h>
 
-
-
 HttpMsg::HttpMsg()
 {
     init();

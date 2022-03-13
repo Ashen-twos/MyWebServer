@@ -7,7 +7,6 @@ ep(), sock(), pool(), addr(), server_state(true), client_addr(), client_sock(-1)
     root = getenv("PWD");
     strcpy(HttpRequest::root,root);
     strcat(HttpRequest::root,"/www");
-    conn = new HttpData[MAX_CONN];
     initlog(true);
     timermanager.setalive(true);
     sql = MySQLPool::GetInstance();
@@ -20,7 +19,6 @@ ep(), sock(), pool(), addr(ip,port), server_state(true), client_addr(), client_s
     root = getenv("PWD");
     strcpy(HttpRequest::root,root);
     strcat(HttpRequest::root,"/www");
-    conn = new HttpData[MAX_CONN];
     //初始化日志
     initlog(log);
     //设置定时器
@@ -31,7 +29,7 @@ ep(), sock(), pool(), addr(ip,port), server_state(true), client_addr(), client_s
 
 Server::~Server()
 {
-    delete [] conn;
+
 }
 
 //LT模式!!!!!!LT模式!!!!!!LT模式!!!!!!LT模式!!!!!!LT模式!!!!!!LT模式!!!!!!LT模式!!!!!!LT模式!!!!!!LT模式!!!!!!LT模式!!!!!!LT模式!!!!!!LT模式!!!!!!
@@ -66,12 +64,14 @@ bool Server::acceptclient(int sockfd)
     if(client_sock<=0)
         return false;
     //初始化连接
-    conn[client_sock].init();
-    conn[client_sock].sockfd = client_sock;
+    if(!conn.count(client_sock))
+        conn.insert({client_sock,std::make_shared<HttpData>()});
+    conn[client_sock]->init();
+    conn[client_sock]->sockfd = client_sock;
     //设置非阻塞
     Socket::setnonblocking2(client_sock);
     //添加定时器
-    timermanager.pushtimer(conn+client_sock,3000,std::bind(&Server::CloseConn,this,conn+client_sock));
+    timermanager.pushtimer(conn[client_sock],3000,std::bind(&Server::CloseConn,this,conn[client_sock]));
     //上树
     ep.addFd(client_sock, EPOLLIN | EPOLLET| EPOLLONESHOT | EPOLLRDHUP);
     LOG_INFO("New Client:%d IP:%s",client_sock,inet_ntoa(client_addr.addr.sin_addr));
@@ -98,17 +98,17 @@ void Server::evenloop()
             //发生错误
             else if (events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR))
             {
-                CloseConn(conn+events[i].data.fd);
+                CloseConn(conn[events[i].data.fd]);
             }
             //读事件
             else if(events[i].events & EPOLLIN)
             {
-                pool.AddTask(std::bind(&Server::OnRead,this,conn+events[i].data.fd));
+                pool.AddTask(std::bind(&Server::OnRead,this,conn[events[i].data.fd]));
             }
             //写事件
             else if(events[i].events & EPOLLOUT)
             {
-                pool.AddTask(std::bind(&Server::OnWrite,this,conn+events[i].data.fd));
+                pool.AddTask(std::bind(&Server::OnWrite,this,conn[events[i].data.fd]));
             }
             else 
                 LOG_ERROR("Other event");
@@ -122,7 +122,7 @@ void Server::run()
     evenloop();
 }
 
-void Server::OnRead(HttpData* user)
+void Server::OnRead(std::shared_ptr<HttpData> user)
 {
     int err = 0;
     if(user->read(&err)<=0 && err!= EAGAIN)
@@ -144,7 +144,7 @@ void Server::OnRead(HttpData* user)
     }
 }
 
-void Server::OnWrite(HttpData* user)
+void Server::OnWrite(std::shared_ptr<HttpData> user)
 {
     int err = 0;
     int ret = user->write(&err);
@@ -183,7 +183,7 @@ void Server::OnWrite(HttpData* user)
 }
 
 
-void Server::CloseConn(HttpData* user)
+void Server::CloseConn(std::shared_ptr<HttpData> user)
 {
     if(user->alive)
     {

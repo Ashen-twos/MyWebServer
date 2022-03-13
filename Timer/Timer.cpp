@@ -1,19 +1,18 @@
 #include "Timer.h"
 
 TimerNode::TimerNode() :
-data(nullptr), isdelete(false), expiredtime(0)
+isdelete(false), expiredtime(0)
 {
 
 }
 
-TimerNode::TimerNode(HttpData* httpdata, int time, const std::function<void()>& callback)
+TimerNode::TimerNode(std::shared_ptr<HttpData> httpdata, int time, const std::function<void()>& callback)
 {
     init(httpdata,time,callback);
 }
 
-void TimerNode::init(HttpData* httpdata, int time, const std::function<void()> callback)
+void TimerNode::init(std::shared_ptr<HttpData> httpdata, int time, const std::function<void()> callback)
 {
-    data = httpdata;
     struct timeval now;
     gettimeofday(&now, NULL);
     expiredtime = (((now.tv_sec % 10000) * 1000) + (now.tv_usec / 1000)) + time;
@@ -63,7 +62,7 @@ TimerManager::~TimerManager()
 
 }
 
-void TimerManager::pushtimer(HttpData* data, int time, const std::function<void()> cb)
+void TimerManager::pushtimer(std::shared_ptr<HttpData> data, int time, const std::function<void()> cb)
 {
     if(alive)
     {

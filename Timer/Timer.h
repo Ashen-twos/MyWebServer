@@ -13,16 +13,15 @@ class HttpData;
 class TimerNode{
     public:
         TimerNode();
-        TimerNode(HttpData* httpdata, int time, const std::function<void()>& callback);
+        TimerNode(std::shared_ptr<HttpData> httpdata, int time, const std::function<void()>& callback);
         ~TimerNode();
     
     public:
         size_t GetExpiretime();
         bool IsDelete();
         std::function<void()> cb;   //回调函数
-        void init(HttpData* httpdata, int time, const std::function<void()> callback);  
+        void init(std::shared_ptr<HttpData> httpdata, int time, const std::function<void()> callback);  
         void update(int);              
-        HttpData* data;             //对应连接的指针
         
     
     private:
@@ -35,7 +34,7 @@ class TimerNode{
 //仿函数,用于比较节点指针
 struct cmp
 {
-    bool operator()(TimerNode* a, TimerNode* b)const
+    bool operator()(std::shared_ptr<TimerNode> a, std::shared_ptr<TimerNode> b)const
     {
         return a->GetExpiretime() > b->GetExpiretime();
     }
@@ -48,12 +47,12 @@ class TimerManager{
         ~TimerManager();
 
     public:
-        void pushtimer(HttpData* data, int time, const std::function<void()> cb);
+        void pushtimer(std::shared_ptr<HttpData> httpdata, int time, const std::function<void()> cb);
         void update();
         void setalive(bool);
 
     private:
-        std::priority_queue<TimerNode*,std::deque<TimerNode*>,cmp> TimerQue;
+        std::priority_queue<std::shared_ptr<TimerNode>,std::deque<std::shared_ptr<TimerNode>>,cmp> TimerQue;
         bool alive;
 
 
