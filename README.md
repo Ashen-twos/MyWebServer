@@ -10,5 +10,4 @@
 * 采用单例模式与阻塞队列实现了异步 **日志系统** ，记录服务器运行状态
 * 使用RAII机制实现 **数据库连接池** ，完成用户数据的CGI校验
 
-![Alt]
-(https://github.com/Ashen-twos/pic/blob/0314de412cf4f95827a98fd6cdb46def0d7f106f/%E4%BB%A3%E7%A0%81%E7%BB%9F%E8%AE%A1.png)
+![Alt](https://github.com/Ashen-twos/pic/blob/0314de412cf4f95827a98fd6cdb46def0d7f106f/%E4%BB%A3%E7%A0%81%E7%BB%9F%E8%AE%A1.png)
