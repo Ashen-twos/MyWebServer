@@ -259,7 +259,7 @@ bool HttpRequest::parse_post()
     MYSQL_ROW row;
     char order[256] = "";
     //获取连接
-    SQLRAII(&con,MySQLPool::GetInstance());
+    SQLRAII tmp = SQLRAII(&con,MySQLPool::GetInstance());
     //查询
     snprintf(order,256,"SELECT user_name, user_password FROM user WHERE user_name = '%s' LIMIT 1;",account);
     LOG_INFO("Query: %s",order);
